@@ -177,7 +177,7 @@ mark{background:#FDF0C7;color:#8a6d1b;padding:.02rem .18rem;border-radius:4px;fo
 </div>
 
 <script>
-const API=new URLSearchParams(location.search).get("api")||"http://localhost:8000";
+const API=new URLSearchParams(location.search).get("api")||location.origin;
 const MODELS="https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights";
 const QS=["Tell me about yourself.","Tell me about a time you led a project.","What is your greatest weakness?",
  "Why do you want to work here?","Give your 60-second startup pitch.","Describe a conflict you resolved at work.","Custom question…"];

@@ -9,6 +9,7 @@ import base64
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from core.pipeline import EmpathAI
@@ -77,3 +78,6 @@ def feedback(req: FeedbackRequest) -> dict:
 @app.get("/stats")
 def stats(session_id: str = "web") -> dict:
     return engine().memory.stats(session_id)
+
+# Serve the web frontend at "/"
+app.mount("/", StaticFiles(directory="web", html=True), name="web")
