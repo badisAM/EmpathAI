@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: empathai-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GROQ_API_KEYS
+        sync: false          # set this in the Render dashboard (never commit keys)
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: ENABLE_FACE
+        value: "0"

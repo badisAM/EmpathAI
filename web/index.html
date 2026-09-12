@@ -1,0 +1,295 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>EmpathAI Coach</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<style>
+:root{
+ --bg:#F3F4F8; --card:#FFFFFF; --ink:#0F1220; --ink2:#2A2F3C; --muted:#6B7385; --faint:#9AA1B2;
+ --line:#E7E9F0; --line2:#EEF0F5; --primary:#4F46E5; --primary2:#7C6CF0; --primary3:#9E8BFF;
+ --soft:#EEF0FE; --ok:#3DA47C; --warn:#E0913E; --bad:#DC6068; --gold:#C9A227;
+ --r:20px; --r-sm:12px;
+ --sh-1:0 1px 2px rgba(16,24,40,.06);
+ --sh-2:0 2px 8px rgba(16,24,40,.06),0 18px 44px rgba(16,24,40,.07);
+ --sh-3:0 8px 24px rgba(79,70,229,.18);
+ --ring:0 0 0 3px rgba(79,70,229,.16);
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+html,body{margin:0}
+body{font-family:Inter,system-ui,-apple-system,sans-serif;color:var(--ink);line-height:1.5;
+ -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+ background:
+  radial-gradient(1000px 460px at 88% -8%,rgba(124,108,240,.12),transparent 62%),
+  radial-gradient(760px 380px at -6% 4%,rgba(79,70,229,.08),transparent 60%),
+  var(--bg);
+ background-attachment:fixed;}
+::selection{background:rgba(79,70,229,.18)}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-thumb{background:#D6DAE4;border:3px solid transparent;border-radius:99px;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:#C2C8D6;background-clip:content-box}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:30;background:rgba(243,244,248,.78);
+ backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid var(--line)}
+.nav .in{max-width:1180px;margin:auto;padding:.8rem 1.4rem;display:flex;align-items:center;gap:.75rem}
+.logo{width:32px;height:32px;border-radius:10px;position:relative;
+ background:linear-gradient(135deg,var(--primary),var(--primary2));box-shadow:var(--sh-3)}
+.logo::after{content:"";position:absolute;inset:8px;border-radius:5px;background:rgba(255,255,255,.85);
+ mask:radial-gradient(circle at 30% 30%,#000 40%,transparent 42%)}
+.bname{font-weight:800;letter-spacing:-.02em;font-size:1.06rem}
+.pill{font-size:.65rem;font-weight:700;letter-spacing:.02em;color:var(--primary);background:var(--soft);
+ padding:.18rem .6rem;border-radius:999px;border:1px solid #E1E4FB}
+.sp{flex:1}
+.status{font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:.4rem}
+.status::before{content:"";width:7px;height:7px;border-radius:50%;background:#C7CCD8}
+
+/* layout */
+.wrap{max-width:1180px;margin:auto;padding:2rem 1.4rem 4rem}
+.hero h1{font-size:clamp(1.7rem,3vw,2.3rem);font-weight:800;letter-spacing:-.03em;margin:.1rem 0 .4rem;
+ background:linear-gradient(180deg,#14172A,#3A3F5A);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);margin:0 0 1.6rem;max-width:660px;font-size:1.05rem}
+.grid{display:grid;grid-template-columns:minmax(420px,460px) 1fr;gap:1.4rem;align-items:start}
+@media(max-width:940px){.grid{grid-template-columns:1fr}}
+
+/* cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+ padding:1.35rem 1.45rem;box-shadow:var(--sh-2);margin-bottom:1.2rem;position:relative;
+ transition:box-shadow .25s ease,transform .25s ease}
+.sticky{position:sticky;top:82px}
+.sec{font-size:.7rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);margin:0 0 .6rem}
+.step{display:flex;align-items:center;gap:.6rem;font-weight:700;font-size:1.05rem;margin:.1rem 0 .6rem}
+.num{width:24px;height:24px;border-radius:50%;color:#fff;font-size:.75rem;font-weight:800;
+ display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--primary),var(--primary2));box-shadow:var(--sh-3)}
+
+/* inputs */
+label{display:block;font-size:.82rem;color:var(--muted);font-weight:500;margin:.85rem 0 .35rem}
+select,input[type=text]{width:100%;padding:.72rem .8rem;border:1px solid var(--line);border-radius:var(--r-sm);
+ font:inherit;font-size:.94rem;background:#fff;color:var(--ink);transition:.18s;appearance:none}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7385' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .8rem center;padding-right:2.2rem}
+select:hover,input:hover{border-color:#D2D6E1}
+select:focus,input:focus{outline:none;border-color:var(--primary);box-shadow:var(--ring)}
+input::placeholder{color:#AEB4C2}
+
+/* record */
+button{font:inherit;font-weight:600;border:none;border-radius:var(--r-sm);cursor:pointer}
+.rec{display:flex;align-items:center;gap:.9rem;margin-top:.55rem}
+.recbtn{background:#fff;border:1px solid var(--line);color:var(--ink);padding:.65rem 1.05rem;
+ display:flex;align-items:center;gap:.55rem;transition:.18s;box-shadow:var(--sh-1)}
+.recbtn:hover{border-color:#CDD2DE;transform:translateY(-1px)}
+.recbtn.on{border-color:#E5484D;color:#E5484D;background:#FFF5F5}
+.rd{width:11px;height:11px;border-radius:50%;background:#E5484D;box-shadow:0 0 0 0 rgba(229,72,77,.5)}
+.rd.pulse{animation:pl 1.2s infinite}
+@keyframes pl{0%{box-shadow:0 0 0 0 rgba(229,72,77,.5)}70%{box-shadow:0 0 0 8px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}
+.timer{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:600;font-size:.95rem}
+.toggle{display:flex;align-items:center;gap:.55rem;margin-top:.95rem;font-size:.9rem;color:var(--ink2);font-weight:500}
+.toggle input{width:17px;height:17px;accent-color:var(--primary)}
+
+/* CAMERA — enlarged */
+.videowrap{position:relative;margin-top:.9rem;display:none;border-radius:16px;overflow:hidden;
+ border:1px solid var(--line);box-shadow:var(--sh-2)}
+video{width:100%;aspect-ratio:4/3;min-height:320px;max-height:440px;background:#0c0e15;object-fit:cover;display:block}
+.emopill{position:absolute;left:12px;bottom:12px;background:rgba(12,14,21,.7);color:#fff;font-size:.82rem;
+ font-weight:600;padding:.32rem .8rem;border-radius:999px;backdrop-filter:blur(6px);
+ border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;gap:.45rem}
+.emopill::before{content:"";width:7px;height:7px;border-radius:50%;background:#67E8B0;box-shadow:0 0 8px #67E8B0}
+
+/* primary button */
+.go{width:100%;margin-top:1.2rem;padding:.9rem;color:#fff;font-size:1rem;font-weight:700;letter-spacing:.01em;
+ background:linear-gradient(135deg,var(--primary),var(--primary2));box-shadow:var(--sh-3);
+ position:relative;overflow:hidden;transition:.2s}
+.go::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.25),transparent 70%);
+ transform:translateX(-120%);transition:transform .6s}
+.go:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 30px rgba(79,70,229,.34)}
+.go:hover:not(:disabled)::after{transform:translateX(120%)}
+.go:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+.hint{font-size:.8rem;color:var(--faint);margin-top:.45rem}
+.empty{color:var(--faint);font-size:.94rem;line-height:1.55}
+
+/* score */
+.scoreflex{display:flex;align-items:center;gap:1.5rem}
+@media(max-width:520px){.scoreflex{flex-direction:column;align-items:flex-start;gap:1rem}}
+.ring{width:118px;height:118px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
+ background:conic-gradient(var(--c) calc(var(--v)*1%),#EBEDF3 0);box-shadow:inset 0 0 0 1px rgba(0,0,0,.03)}
+.ring .i{width:88px;height:88px;background:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:var(--sh-1)}
+.ring .b{font-size:1.9rem;font-weight:800;letter-spacing:-.02em}
+.ring .o{font-size:.62rem;color:var(--muted);letter-spacing:.05em}
+.verdict{display:inline-block;font-size:.78rem;font-weight:700;color:#fff;padding:.24rem .7rem;border-radius:999px;box-shadow:var(--sh-1)}
+.dim{display:flex;justify-content:space-between;font-size:.85rem;color:var(--ink2);margin:.6rem 0 .18rem;font-weight:500}
+.bar{height:8px;border-radius:6px;background:#EDEFF3;overflow:hidden}
+.fill{height:100%;border-radius:6px;transition:width .7s cubic-bezier(.2,.7,.3,1)}
+
+/* face read */
+.faceline{font-size:1.08rem;font-weight:700;margin-bottom:.6rem;letter-spacing:-.01em;color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.35rem}
+.chip{font-size:.74rem;padding:.22rem .65rem;border-radius:999px;background:#F5F6F9;border:1px solid var(--line);
+ color:#48506180;color:#485061;display:flex;align-items:center;gap:.4rem;font-weight:500}
+.cdot{width:8px;height:8px;border-radius:50%}
+.spark{display:flex;align-items:flex-end;gap:4px;height:56px;margin-top:.8rem;padding:.4rem;background:#FAFBFC;border-radius:10px;border:1px solid var(--line2)}
+.sb{flex:1;border-radius:4px 4px 0 0;min-height:4px;transition:height .5s ease}
+
+/* text blocks */
+.fb{font-size:.95rem;line-height:1.72;white-space:pre-wrap;color:var(--ink2)}
+.model{background:linear-gradient(180deg,#F7F8FF,#F4F5FF);border:1px solid #E4E7FB;border-radius:14px;
+ padding:1.05rem 1.2rem;font-size:.92rem;line-height:1.68;color:#2E2C63;white-space:pre-wrap}
+.focus{font-size:.93rem;line-height:1.95;color:var(--ink2)}
+.fbrow{display:flex;gap:.6rem;margin-top:.95rem}
+.fbrow button{background:#fff;border:1px solid var(--line);padding:.5rem .95rem;transition:.15s;box-shadow:var(--sh-1)}
+.fbrow button:hover{border-color:#CDD2DE;transform:translateY(-1px)}
+details{margin-top:.8rem}summary{cursor:pointer;color:var(--muted);font-size:.86rem;font-weight:500}
+summary:hover{color:var(--primary)}
+.src{background:#FAFBFC;border:1px solid var(--line);border-radius:10px;padding:.55rem .75rem;font-size:.8rem;color:#4b5563;margin:.32rem 0;line-height:1.5}
+mark{background:#FDF0C7;color:#8a6d1b;padding:.02rem .18rem;border-radius:4px;font-weight:500}
+.err{background:#FDECEC;border:1px solid #F3C2C0;color:#B42318;padding:.65rem .85rem;border-radius:12px;font-size:.85rem;margin-top:.75rem}
+.loading{display:flex;align-items:center;gap:.65rem;color:var(--muted);font-weight:500}
+.spn{width:17px;height:17px;border:2.5px solid #DFE3EA;border-top-color:var(--primary);border-radius:50%;animation:s 1s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+.card{animation:rise .4s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style></head><body>
+
+<div class="nav"><div class="in"><div class="logo"></div><span class="bname">EmpathAI&nbsp;Coach</span>
+<span class="pill">AI interview coach</span><span class="sp"></span><span class="status" id="st">connecting…</span></div></div>
+
+<div class="wrap">
+ <div class="hero"><h1>Rehearse. Get scored. Improve.</h1>
+ <p>Answer a real interview question out loud with your camera on. EmpathAI scores content and delivery,
+ reads your composure live, and coaches you — in your own language.</p></div>
+
+ <div class="grid">
+  <div class="card sticky">
+   <div class="step"><span class="num">1</span> Question</div>
+   <select id="q"></select>
+   <div id="cw" style="display:none"><label>Your question</label><input id="qc" type="text" placeholder="Type your question"/></div>
+   <label>Target role (optional)</label><input id="role" type="text" placeholder="e.g. Data Analyst"/>
+
+   <div class="step" style="margin-top:1rem"><span class="num">2</span> Record</div>
+   <div class="rec"><button class="recbtn" id="rb"><span class="rd"></span><span id="rl">Record</span></button><span class="timer" id="tm">0:00</span></div>
+   <div class="hint">Speak ~30–60s. Allow the mic when asked.</div>
+   <div class="toggle"><input type="checkbox" id="cam"/><label for="cam" style="margin:0">Use camera (live composure read)</label></div>
+   <div class="videowrap" id="vw"><video id="v" playsinline muted></video><span class="emopill" id="ep">…</span></div>
+
+   <button class="go" id="go" disabled>Analyze my answer</button>
+   <div id="msg"></div>
+  </div>
+
+  <div id="res"><div class="card"><div class="empty">Your scorecard, live face read, and coaching will appear here after you analyze an answer.</div></div></div>
+ </div>
+</div>
+
+<script>
+const API=new URLSearchParams(location.search).get("api")||"http://localhost:8000";
+const MODELS="https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights";
+const QS=["Tell me about yourself.","Tell me about a time you led a project.","What is your greatest weakness?",
+ "Why do you want to work here?","Give your 60-second startup pitch.","Describe a conflict you resolved at work.","Custom question…"];
+const LB={orchestrator:"Orchestrator",diagnostician:"Diagnostician",retriever:"Dynamic RAG",strategist:"Strategist",scorer:"Scorer",coach:"Coach",rewrite:"Rewrite"};
+const EC={joy:"#F2B705",sadness:"#5B8DEF",anger:"#E5484D",fear:"#8B6FE8",surprise:"#12B5A5",frustration:"#F2711C",neutral:"#8A94A6"};
+const FW={joy:"positive and engaged",neutral:"calm and composed",surprise:"animated and reactive",fear:"nervous and tense",sadness:"subdued or unsure",anger:"tense",frustration:"tense or impatient"};
+const MAP={happy:"joy",sad:"sadness",angry:"anger",fearful:"fear",surprised:"surprise",disgusted:"frustration",neutral:"neutral"};
+const NEG=new Set(["fear","sadness","anger","frustration"]);
+const $=i=>document.getElementById(i);
+const qs=$("q");QS.forEach(q=>{const o=document.createElement("option");o.textContent=q;qs.appendChild(o)});
+qs.onchange=()=>$("cw").style.display=qs.value==="Custom question…"?"block":"none";
+const sc=s=>s<50?"#DC6068":s<70?"#E0913E":s<85?"#C9A227":"#3DA47C";
+
+fetch(API+"/health").then(r=>r.json()).then(()=>$("st").textContent="backend online").catch(()=>$("st").textContent="backend offline — add ?api=URL");
+
+// ---- camera + live face (browser side, no server needed)
+let camStream=null,modelsReady=false,detTimer=null,samples=[],recording=false;
+$("cam").onchange=async e=>{ if(e.target.checked){await startCam()}else{stopCam()} };
+async function startCam(){
+ try{
+  camStream=await navigator.mediaDevices.getUserMedia({video:{width:480,height:360}});
+  $("v").srcObject=camStream;$("vw").style.display="block";await $("v").play();
+  if(typeof faceapi==="undefined"){$("ep").textContent="face model unavailable";return;}
+  $("ep").textContent="loading model…";
+  if(!modelsReady){await faceapi.nets.tinyFaceDetector.loadFromUri(MODELS);
+   await faceapi.nets.faceExpressionNet.loadFromUri(MODELS);modelsReady=true;}
+  detTimer=setInterval(detect,700);
+ }catch(err){$("cam").checked=false;msg("Camera/model error: "+err.message)}
+}
+function stopCam(){if(detTimer)clearInterval(detTimer);if(camStream)camStream.getTracks().forEach(t=>t.stop());camStream=null;$("vw").style.display="none"}
+async function detect(){
+ if(!modelsReady||!$("v").videoWidth)return;
+ const r=await faceapi.detectSingleFace($("v"),new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
+ if(!r){$("ep").textContent="no face";return;}
+ const ex=r.expressions;let best="neutral",bv=0;for(const k in ex)if(ex[k]>bv){bv=ex[k];best=k}
+ const emo=MAP[best]||"neutral";$("ep").textContent=emo+" "+Math.round(bv*100)+"%";
+ if(recording)samples.push({emotion:emo,intensity:+bv.toFixed(2)});
+}
+function aggFace(){
+ if(!samples.length)return null;
+ const c={};samples.forEach(s=>c[s.emotion]=(c[s.emotion]||0)+1);
+ const tot=samples.length,dom=Object.entries(c).sort((a,b)=>b[1]-a[1])[0][0];
+ const di=samples.filter(s=>s.emotion===dom).map(s=>s.intensity);
+ const dist={};Object.entries(c).sort((a,b)=>b[1]-a[1]).forEach(([e,n])=>dist[e]=+(n/tot).toFixed(2));
+ return{emotion:dom,intensity:+(di.reduce((a,b)=>a+b,0)/di.length).toFixed(2),
+  distribution:dist,timeline:samples.map(s=>[s.emotion,s.intensity]),frames:tot};
+}
+
+// ---- audio recording (simultaneous with the live video)
+let mr,chunks=[],blob=null,mime="audio/webm",t0=0,dur=0,tk=null;
+$("rb").onclick=async()=>{
+ if(mr&&mr.state==="recording"){mr.stop();return}
+ try{
+  const s=await navigator.mediaDevices.getUserMedia({audio:true});
+  mime=MediaRecorder.isTypeSupported("audio/webm")?"audio/webm":"";
+  mr=mime?new MediaRecorder(s,{mimeType:mime}):new MediaRecorder(s);
+  chunks=[];samples=[];
+  mr.ondataavailable=e=>chunks.push(e.data);
+  mr.onstop=()=>{blob=new Blob(chunks,{type:mime||"audio/webm"});dur=(Date.now()-t0)/1000;recording=false;
+   s.getTracks().forEach(t=>t.stop());clearInterval(tk);
+   $("rb").classList.remove("on");$("rl").textContent="Re-record";$("rb").querySelector(".rd").classList.remove("pulse");$("go").disabled=false;};
+  mr.start();t0=Date.now();recording=true;
+  $("rb").classList.add("on");$("rl").textContent="Stop";$("rb").querySelector(".rd").classList.add("pulse");
+  tk=setInterval(()=>{const x=Math.floor((Date.now()-t0)/1000);$("tm").textContent=Math.floor(x/60)+":"+String(x%60).padStart(2,"0")},250);
+ }catch(err){msg("Microphone error: "+err.message)}
+};
+const msg=(t)=>$("msg").innerHTML=t?`<div class="err">${t}</div>`:"";
+const b64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=rej;r.readAsDataURL(b)});
+
+$("go").onclick=async()=>{
+ const question=qs.value==="Custom question…"?$("qc").value.trim():qs.value;
+ if(!question)return msg("Enter a question first.");if(!blob)return msg("Record your answer first.");
+ msg("");$("res").innerHTML=`<div class="card"><div class="loading"><div class="spn"></div>Transcribing and coaching…</div></div>`;
+ const payload={question,role:$("role").value.trim(),audio_b64:await b64(blob),audio_mime:mime,duration:dur,face:aggFace(),session_id:"web"};
+ try{const r=await fetch(API+"/coach",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  if(!r.ok)throw new Error("HTTP "+r.status);render(await r.json());}
+ catch(e){$("res").innerHTML=`<div class="card"><div class="err">Analysis failed: ${e.message}. Is the backend running at ${API}?</div></div>`}
+};
+
+function descFace(f){let base=FW[f.emotion]||"steady",tr="";const tl=f.timeline||[];
+ if(tl.length>=4){const h=Math.floor(tl.length/2),n=g=>g.filter(x=>NEG.has(x[0])).length/Math.max(1,g.length);
+  const a=n(tl.slice(0,h)),b=n(tl.slice(h));tr=b<a-.2?" You settled and grew more comfortable as you went.":b>a+.2?" You tensed up toward the end.":" Your composure stayed steady throughout.";}
+ return`On camera you came across as ${base}.${tr}`;}
+
+function render(res){
+ const ov=res.scores.overall,c=sc(ov);
+ let dims="";for(const[k,v]of Object.entries(res.dimensions))dims+=`<div class="dim"><span>${k}</span><span style="color:#9aa2b1">${v}</span></div><div class="bar"><div class="fill" style="width:${v}%;background:${sc(v)}"></div></div>`;
+ let face;if(res.face){const d=res.face.distribution||{},tl=res.face.timeline||[];
+  const ch=Object.entries(d).slice(0,4).map(([e,p])=>`<span class="chip"><span class="cdot" style="background:${EC[e]||'#8A94A6'}"></span>${e} ${Math.round(p*100)}%</span>`).join("");
+  const sp=tl.map(([e,i])=>`<div class="sb" style="height:${Math.max(i,.05)*100}%;background:${EC[e]||'#8A94A6'}"></div>`).join("");
+  face=`<div class="card"><div class="sec">Face read</div><div class="faceline">${descFace(res.face)}</div><div class="chips">${ch}</div><div class="hint" style="margin-top:.6rem">Composure over time (${res.face.frames} reads)</div><div class="spark">${sp}</div></div>`;
+ }else face=`<div class="card"><div class="sec">Face read</div><div class="empty">No camera data. Tick “Use camera” <b>before</b> pressing Record to get a live composure read.</div></div>`;
+ const m=res.metrics,dl=res.delivery;
+ const mc=[`${m.words} words`,`${m.fillers} fillers`,m.wpm?`${m.wpm} wpm`:"wpm n/a",`pace ${dl.pace}`].map(t=>`<span class="chip">${t}</span>`).join("");
+ const fo=(res.strategies||[]).map(s=>`• ${s}`).join("<br>");
+ const ag=Object.entries(LB).map(([k,l])=>`<span class="chip"><span class="cdot" style="background:${(res.agent_path||[]).includes(k)?'#4F46E5':'#D7DAE0'}"></span>${l}</span>`).join("");
+ const sr=(res.sources||[]).map(s=>`<div class="src">📄 ${s.source} · score ${s.score}</div>`).join("");
+ let tr=res.transcript||"";for(const f of Object.keys(m.filler_breakdown||{}))tr=tr.replace(new RegExp("\\b"+f+"\\b","ig"),x=>`<mark>${x}</mark>`);
+ $("res").innerHTML=`
+ <div class="card"><div class="sec">Overall</div><div class="scoreflex">
+  <div class="ring" style="--v:${ov};--c:${c}"><div class="i"><div class="b" style="color:${c}">${ov}</div><div class="o">/100</div></div></div>
+  <div style="flex:1"><span class="verdict" style="background:${c}">${res.verdict}</span><div style="margin-top:.7rem">${dims}</div></div></div>
+  <div class="chips" style="margin-top:.9rem">${mc}</div></div>
+ ${face}
+ ${fo?`<div class="card"><div class="sec">Focus for you</div><div class="focus">${fo}</div></div>`:""}
+ <div class="card"><div class="sec">Coach feedback</div><div class="fb">${res.feedback}</div></div>
+ <div class="card"><div class="sec">Model answer</div><div class="model">${res.model_answer}</div></div>
+ <div class="card"><div class="fbrow"><button onclick="fb(${res.id},1,this)">👍 Helpful</button><button onclick="fb(${res.id},0,this)">👎 Not helpful</button></div>
+  <details><summary>How the coach reached this</summary><div class="chips" style="margin-top:.6rem">${ag}</div>${sr}
+  <div class="hint" style="margin-top:.5rem">Transcript (fillers highlighted)</div><div class="src">${tr}</div></details></div>`;
+ window.scrollTo({top:document.querySelector(".grid").offsetTop-60,behavior:"smooth"});
+}
+function fb(id,v,b){fetch(API+"/feedback",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({attempt_id:id,value:v})});b.textContent="✓ Thanks";b.disabled=true}
+window.fb=fb;
+</script></body></html>

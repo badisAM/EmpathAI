@@ -1,0 +1,8 @@
+# Facial + VIDEO modality. Install only if you use the camera (ENABLE_FACE=1).
+# Heavy (TensorFlow). First run downloads a model once.
+deepface>=0.0.93
+tf-keras
+opencv-python-headless
+pillow
+streamlit-webrtc>=0.47
+av
